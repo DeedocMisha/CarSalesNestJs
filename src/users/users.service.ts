@@ -5,17 +5,21 @@ import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { JwtPayload } from './JWT.payload.interface';
 import { ValidateUserDto } from './dto/ValidateUserDto';
-import {Users} from "../model/users.model";
-import {Roles} from "../model/roles.model";
-import {UserRoles} from "../model/userroles.model";
+import {Users} from "../models/users.model";
+import {Roles} from "../models/roles.model";
+import {UserRoles} from "../models/userroles.model";
 import {DataTypes} from "sequelize";
-
+import {Products} from "../models/products.model";
+import {Favourites} from "../models/favourites.model";
+import * as argon2 from 'argon2';
 
 @Injectable()
 export class UserService {
   constructor(
     private readonly rolesService: RolesService,
     private readonly jwtService: JwtService,
+    private readonly products: typeof Products,
+    private readonly favourite: typeof Favourites
   ) {}
 
   // Метод для логина пользователя
@@ -24,10 +28,21 @@ export class UserService {
     return this.generateToken(user); // Генерация JWT токена для пользователя
   }
 
+  async getBalance(userid: number){
+    try {
+      return await this.findOne({where:{user_id: userid}})
+    }
+    catch (error) {
+      return {"error": "Не удалось получить балланс пользователя"};
+    }
+  }
+
   // Метод для регистрации пользователя
   async register(createUserDto: CreateUserDto) {
     // Хешируем пароль пользователя
-    const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
+    const firstHash = await argon2.hash(createUserDto.password);
+    const secondHash = await argon2.hash(firstHash);
+    const hashedPassword = await argon2.hash(secondHash);
 
     // Создаем запись пользователя в базе данных
     const user = await Users.create({
@@ -138,6 +153,40 @@ export class UserService {
     } catch (error) {
       console.error(`Error while finding user: ${error.message}`);
       throw new Error(`Error finding user: ${error.message}`);
+    }
+  }
+
+  async like(UserId: number, ProductId: number) {
+    try {
+      // Проверяем, существует ли пользователь
+      const user = await this.findOne({ where: { id: UserId } });
+      if (!user) {
+        throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+      }
+
+      // Проверяем, существует ли продукт
+      const product = await this.products.findOne({ where: { id: ProductId } });
+      if (!product) {
+        throw new HttpException('Product not found', HttpStatus.NOT_FOUND);
+      }
+
+      // Проверяем, нет ли уже этого товара в избранном
+      const existingFavourite = await this.favourite.findOne({
+        where: { user_id: UserId, product_id: ProductId },
+      });
+
+      if (existingFavourite) {
+        return { message: 'This product is already in favourites' };
+      }
+
+      // Создаём связь и сохраняем
+      const favourite = await this.favourite.create({ user_id: UserId, product_id: ProductId });
+      await favourite.save();
+
+      return { message: 'Product added to favourites', favourite };
+    } catch (error) {
+      console.error(`Error while adding to favourites: ${error.message}`);
+      throw new HttpException(`Ошибка добавления в избранные: ${error.message}`, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 

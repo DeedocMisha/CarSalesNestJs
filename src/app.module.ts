@@ -1,14 +1,12 @@
 import { Module } from '@nestjs/common';
 import { SequelizeModule } from '@nestjs/sequelize';
-import { Users } from '../users.model';
-import { Roles } from '../roles.model';
-import { Requests } from '../requests.model';
-import { Models } from '../models.model';
-import { UserRoles } from '../userroles.model';
+
 import { UsersModule } from './users/users.module';
 import { RolesModule } from './roles/roles.module';
-import { RequestsModule } from './requests/requests.module';
-import { ModelsModule } from './models/models.module';
+import { InitModule } from './init_data/init.module';
+import {Users} from "./models/users.model";
+import {Roles} from "./models/roles.model";
+import {UserRoles} from "./models/userroles.model";
 
 @Module({
   imports: [
@@ -19,12 +17,11 @@ import { ModelsModule } from './models/models.module';
       username: process.env.DB_USER || 'postgres',
       password: process.env.DB_PASSWORD || 'passw',
       database: process.env.DB_NAME || 'postgres',
-      models: [Users, Roles, Requests, Models, UserRoles],
+      models: [Users, Roles, UserRoles],
     }),
     UsersModule,
     RolesModule, // Импортируем RolesModule
-    RequestsModule,
-    ModelsModule,
+    InitModule,
   ],
 })
 export class AppModule {}

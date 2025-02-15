@@ -1,5 +1,4 @@
 import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { CreateUserDto } from './dto/CreateUserDto';
 import { UserService } from './users.service';
 import { ValidateUserDto } from './dto/ValidateUserDto';
@@ -7,7 +6,6 @@ import { JwtAuthGuard } from './JwtAuthGuard';
 import { Roles } from '../roles/roles.decorator';
 import { RolesGuard } from '../roles/roles.guard';
 
-@ApiTags('пользователи')
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UserService) {}
@@ -28,5 +26,10 @@ export class UsersController {
   DoUserAdmin(@Param('id') id: number) {
     return this.usersService.DoAdmin(id);
   }
+
+ @Get('GetBalance')
+  getBalance(@Param('userid') userid){
+    return this.usersService.getBalance(userid);
+ }
 
 }
