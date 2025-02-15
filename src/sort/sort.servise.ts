@@ -3,6 +3,7 @@ import { Products } from '../models/products.model';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Ratings } from '../models/ratings.model';
+import { SortDto } from './dto/sort.dto';
 
 @Injectable()
 export class SortService {
@@ -13,7 +14,7 @@ export class SortService {
     private readonly ratingTable: Repository<Ratings>,
   ) {}
 
-  async GetSort(query) {
+  async GetSort(query:SortDto) {
     const queryBuilder = this.productTable.createQueryBuilder('product');
     // Если нужно соединить таблицы, например для рейтингов:
     queryBuilder.leftJoinAndSelect('product.ratings', 'rating');

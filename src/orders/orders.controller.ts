@@ -1,29 +1,28 @@
-import {Body, Controller, Delete, Get, Post, UseGuards} from '@nestjs/common';
-import {OrdersService} from "./orders.service";
-import {SendProductDto} from "./dto/send.product.dto";
+import { Body, Controller, Delete, Get, Post } from '@nestjs/common';
+import { SendOrderDto } from './dto/SendOrderDto';
+import { OrdersService } from './orders.service';
 
-
-@Controller()
+@Controller('orders')
 export class OrdersController {
-    constructor(private readonly productsService: OrdersService) {}
+    constructor(private readonly ordersService: OrdersService) {}
 
-    @Get('GetProdById')
-    SendMess(@Body() id:number) {
-        return this.productsService.getProductById(id);
+    @Get('getOrderById')
+    getOrderById(@Body() { id }: { id: number }) {
+        return this.ordersService.getOrderById(id);
     }
 
-    @Get('GetAllProducts')
-    GetRat() {
-        return this.productsService.getAllProducts();
+    @Get('getAllOrders')
+    getAllOrders() {
+        return this.ordersService.getAllOrders();
     }
 
-    @Post('SetProduct')
-    Send( @Body() sendProductDto: SendProductDto) {
-        return this.productsService.sentProducts(sendProductDto);
+    @Post('createOrder')
+    createOrder(@Body() sendOrderDto: SendOrderDto) {
+        return this.ordersService.createOrder(sendOrderDto);
     }
 
-    @Delete('DeleteProduct')
-    DelFromAdmin(@Body() product_id:number) {
-        return this.productsService.deleteProduct(product_id);
+    @Delete('deleteOrder')
+    deleteOrder(@Body() { order_id }: { order_id: number }) {
+        return this.ordersService.deleteOrder(order_id);
     }
 }

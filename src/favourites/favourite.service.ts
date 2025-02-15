@@ -26,7 +26,10 @@ export class FavouriteService {
 
     async createFavourite(createFavouriteDto: CreateFavouriteDto) {
         try {
-            await this.favouriteTable.create(createFavouriteDto);
+            await this.favouriteTable.create({
+                user_id:createFavouriteDto.UserId,
+                favourite_id:createFavouriteDto.ProductId
+            });
         }
         catch (error) {
             return {message: "Ошибка добавления в избранное"}
